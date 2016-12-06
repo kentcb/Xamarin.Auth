@@ -68,11 +68,11 @@ namespace Xamarin.Auth
 					/// Pull Request - manually added/fixed
 					///		OAuth2Authenticator changes to work with joind.in OAuth #91
 					///		https://github.com/xamarin/Xamarin.Auth/pull/91
-					///		
+					///
 					DismissViewControllerAsync(true);
 					///---------------------------------------------------------------------------------------
 					# endregion
-					});				
+					});
 			}
 
 			activity = new UIActivityIndicatorView (UIActivityIndicatorViewStyle.White);
@@ -107,7 +107,7 @@ namespace Xamarin.Auth
 					// Delete cookies so we can work with multiple accounts
 					if (this.authenticator.ClearCookiesBeforeLogin)
 						WebAuthenticator.ClearCookies();
-					
+
 					//
 					// Begin displaying the page
 					//
@@ -115,7 +115,7 @@ namespace Xamarin.Auth
 				}
 			}, TaskScheduler.FromCurrentSynchronizationContext ());
 		}
-		
+
 		void LoadInitialUrl (Uri url)
 		{
 			if (!webViewVisible) {
@@ -212,7 +212,24 @@ namespace Xamarin.Auth
 
 			public override bool ShouldStartLoad (UIWebView webView, NSUrlRequest request, UIWebViewNavigationType navigationType)
 			{
-				var nsUrl = request.Url;
+                var webRedirectAuthenticator = controller.authenticator as WebRedirectAuthenticator;
+
+                // check if we're attempting to load the redirect URL and make sure that doesn't happen
+                if (webRedirectAuthenticator != null)
+                {
+                    var uri = new Uri(request.Url.AbsoluteString);
+
+                    if (webRedirectAuthenticator.UrlMatchesRedirect(uri))
+                    {
+                        // we have to manually call OnPageLoaded here otherwise the authenticator never knows we're done!
+                        webRedirectAuthenticator.OnPageLoaded(uri);
+
+                        // don't load redirect page!
+                        return false;
+                    }
+                }
+
+                var nsUrl = request.Url;
 
 				if (nsUrl != null && !controller.authenticator.HasCompleted) {
 					Uri url;
@@ -233,7 +250,11 @@ namespace Xamarin.Auth
 
 			public override void LoadFailed (UIWebView webView, NSError error)
 			{
-				if (error.Domain == "NSURLErrorDomain" && error.Code == -999)
+                // this "error" comes through whenever we return false from ShouldStartLoad
+                if (error.Domain == "WebKitErrorDomain" && error.Code == 102)
+                    return;
+
+                if (error.Domain == "NSURLErrorDomain" && error.Code == -999)
 					return;
 
 				controller.activity.StopAnimating ();

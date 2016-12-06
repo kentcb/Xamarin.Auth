@@ -76,42 +76,50 @@ namespace Xamarin.Auth
 			var fragment = WebEx.FormDecode (url.Fragment);
 
 			OnPageEncountered (url, query, fragment);
-		}
 
-		/// <summary>
-		/// Event handler called when a new page is being loaded in the web browser.
-		/// </summary>
-		/// <param name='url'>
-		/// The URL of the page.
-		/// </param>
-		public override void OnPageLoading (Uri url)
+            //
+            // Watch for the redirect
+            //
+            if (UrlMatchesRedirect(url))
+            {
+                OnRedirectPageLoaded(url, query, fragment);
+            }
+        }
+
+        /// <summary>
+        /// Event handler called when a new page is being loaded in the web browser.
+        /// </summary>
+        /// <param name='url'>
+        /// The URL of the page.
+        /// </param>
+        public override void OnPageLoading (Uri url)
 		{
 			var query = WebEx.FormDecode (url.Query);
 			var fragment = WebEx.FormDecode (url.Fragment);
 
 			OnPageEncountered (url, query, fragment);
-		}
+        }
 
-		/// <summary>
-		/// Raised when a new page has been encountered.
-		/// </summary>
-		/// <param name='url'>
-		/// URL of the page.
-		/// </param>
-		/// <param name='query'>
-		/// The parsed query of the URL.
-		/// </param>
-		/// <param name='fragment'>
-		/// The parsed fragment of the URL.
-		/// </param>
-		/// <remarks>
-		/// <para>
-		/// This is invoked on any event that has a URL: <see cref="OnPageLoaded" /> and <see cref="OnPageLoading" />.
-		/// Not all platforms may support triggering <see cref="OnPageLoading" />, so this is provided as a blanket
-		/// method to check redirect URLs at the earliest possible time to avoid showing redirect pages if unnecessary.
-		/// </para>
-		/// </remarks>
-		protected virtual void OnPageEncountered (Uri url, IDictionary<string, string> query, IDictionary<string, string> fragment)
+        /// <summary>
+        /// Raised when a new page has been encountered.
+        /// </summary>
+        /// <param name='url'>
+        /// URL of the page.
+        /// </param>
+        /// <param name='query'>
+        /// The parsed query of the URL.
+        /// </param>
+        /// <param name='fragment'>
+        /// The parsed fragment of the URL.
+        /// </param>
+        /// <remarks>
+        /// <para>
+        /// This is invoked on any event that has a URL: <see cref="OnPageLoaded" /> and <see cref="OnPageLoading" />.
+        /// Not all platforms may support triggering <see cref="OnPageLoading" />, so this is provided as a blanket
+        /// method to check redirect URLs at the earliest possible time to avoid showing redirect pages if unnecessary.
+        /// </para>
+        /// </remarks>
+        protected virtual void OnPageEncountered (Uri url, IDictionary<string, string> query, IDictionary<string, string> fragment)
 		{
 			var all = new Dictionary<string, string> (query);
 			foreach (var kv in fragment)
@@ -128,16 +136,9 @@ namespace Xamarin.Auth
 				OnError (description);
 				return;
 			}
-
-			//
-			// Watch for the redirect
-			//
-			if (UrlMatchesRedirect (url)) {
-				OnRedirectPageLoaded (url, query, fragment);
-			}
 		}
 
-		private bool UrlMatchesRedirect (Uri url)
+		public bool UrlMatchesRedirect (Uri url)
 		{
 			return url.Host == redirectUrl.Host && url.LocalPath == redirectUrl.LocalPath;
 		}
