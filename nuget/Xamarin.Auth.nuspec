@@ -118,14 +118,6 @@
 			>
 		</file>
 
-		<!--
-			Xamarin.iOS Classic
-		-->
-		<file
-			src="output/ios/Xamarin.Auth.dll"
-			target="lib/MonoTouch10/Xamarin.Auth.dll"
-			>
-		</file>
 
 		<!--
 			Windows Phone 8 Silverlight

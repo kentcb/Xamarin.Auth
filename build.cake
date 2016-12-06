@@ -12,6 +12,7 @@
 #addin "Cake.Xamarin"
 
 var TARGET = Argument ("t", Argument ("target", Argument ("Target", "Default")));
+var VERSION = "1.0.0-qut";
 
 FilePath nuget_tool_path = null;
 FilePath cake_tool_path = null;
@@ -286,20 +287,6 @@ Task ("libs")
 				//-------------------------------------------------------------------------------------
 				MSBuild
 					(
-						"./source/Xamarin.Auth.XamarinIOS-Classic/Xamarin.Auth.XamarinIOS-Classic.csproj", 
-						c => 
-						{
-							c.SetConfiguration("Release");
-						}
-					);
-				CopyFiles
-					(
-						"./source/Xamarin.Auth.XamarinIOS-Classic/**/Release/Xamarin.Auth.dll", 
-						"./output/ios/"
-					);
-				//-------------------------------------------------------------------------------------
-				MSBuild
-					(
 						"./source/Xamarin.Auth.WindowsPhone8/Xamarin.Auth.WindowsPhone8.csproj", 
 						c => 
 						{
@@ -417,20 +404,6 @@ Task ("libs")
 						"./output/ios-unified/"
 					);
 				//-------------------------------------------------------------------------------------
-				MSBuild
-					(
-						"./source/Extensions/Xamarin.Auth.Extensions.XamarinIOS-Classic/Xamarin.Auth.Extensions.XamarinIOS-Classic.csproj", 
-						c => 
-						{
-							c.SetConfiguration("Release");
-						}
-					);
-				CopyFiles
-					(
-						"./source/Extensions/Xamarin.Auth.Extensions.XamarinIOS-Classic/**/Release/Xamarin.Auth.Extensions.dll", 
-						"./output/ios/"
-					);
-				//-------------------------------------------------------------------------------------
 			} 
 			else	// ! IsRunningOnWindows() 
 			{
@@ -510,23 +483,6 @@ Task ("libs")
 						"./output/ios-unified/"
 					);
 				//-------------------------------------------------------------------------------------
-				XBuild
-					(
-						"./source/Xamarin.Auth.XamarinIOS-Classic/Xamarin.Auth.XamarinIOS-Classic.csproj", 
-						c => 
-						{
-							c.SetConfiguration("Release");
-						}
-					);
-				CopyFiles
-					(
-						"./source/Xamarin.Auth.XamarinIOS-Classic/**/Release/Xamarin.Auth.dll", 
-						"./output/ios/"
-					);
-				//-------------------------------------------------------------------------------------
-
-
-
 
 
 
@@ -573,20 +529,6 @@ Task ("libs")
 						"./output/ios-unified/"
 					);
 				//-------------------------------------------------------------------------------------
-				XBuild
-					(
-						"./source/Extensions/Xamarin.Auth.Extensions.XamarinIOS-Classic/Xamarin.Auth.Extensions.XamarinIOS-Classic.csproj", 
-						c => 
-						{
-							c.SetConfiguration("Release");
-						}
-					);
-				CopyFiles
-					(
-						"./source/Extensions/Xamarin.Auth.Extensions.XamarinIOS-Classic/**/Release/Xamarin.Auth.Extensions.dll", 
-						"./output/ios/"
-					);
-				//-------------------------------------------------------------------------------------
 
 			}
 
@@ -605,6 +547,7 @@ Task ("nuget")
 					"./nuget/Xamarin.Auth.nuspec", 
 					new NuGetPackSettings 
 					{ 
+                        Version = VERSION,
 						Verbosity = NuGetVerbosity.Detailed,
 						OutputDirectory = "./output/",        
 						BasePath = "./",
@@ -615,7 +558,8 @@ Task ("nuget")
 				(
 					"./nuget/Xamarin.Auth.Extensions.nuspec", 
 					new NuGetPackSettings 
-					{ 
+					{
+                        Version = VERSION,
 						Verbosity = NuGetVerbosity.Detailed,
 						OutputDirectory = "./output/",        
 						BasePath = "./",
@@ -634,6 +578,8 @@ Task ("externals")
 		}
 	);
 
+Task ("Default")
+	.IsDependentOn ("nuget");
 
 FilePath GetToolPath (FilePath toolPath)
 {
